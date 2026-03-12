@@ -142,7 +142,7 @@ export const usePrediction = () => {
       ];
 
       try {
-        const sentRes = await fetch('http://localhost:5000/api/predict/sentiment', {
+        const sentRes = await fetch('https://traders-paradise-3.onrender.com/api/predict/sentiment', , {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
