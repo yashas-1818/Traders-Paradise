@@ -17,3 +17,5 @@ mongoose.connect(process.env.MONGO_URI)
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log('🚀 Server running on port ' + PORT));
+app.use('/api/holdings', require('./routes/holdings'));
+app.use('/api/admin', require('./routes/admin'));

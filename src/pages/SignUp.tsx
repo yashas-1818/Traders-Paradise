@@ -1,163 +1,236 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { ArrowLeft, Eye, EyeOff, UserPlus } from 'lucide-react';
-import { useAuth } from '@/contexts/AuthContext';
+import { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { Eye, EyeOff, CheckCircle2, XCircle } from 'lucide-react';
+
+const PROFESSIONS = [
+  'Student', 'Software Engineer', 'Doctor', 'Business Owner',
+  'Teacher', 'Accountant', 'Lawyer', 'Government Employee',
+  'Freelancer', 'Investor', 'Other',
+];
+
+const INCOME_RANGES = [
+  'Below ₹2 LPA', '₹2–5 LPA', '₹5–10 LPA',
+  '₹10–20 LPA', '₹20–50 LPA', 'Above ₹50 LPA',
+  'Prefer not to say',
+];
+
+const VALID_EMAIL_DOMAINS = [
+  'gmail.com', 'yahoo.com', 'outlook.com', 'hotmail.com',
+  'icloud.com', 'protonmail.com', 'rediffmail.com', 'live.com',
+];
+
+interface PasswordCheck {
+  label: string;
+  passed: boolean;
+}
+
+const getPasswordChecks = (password: string): PasswordCheck[] => [
+  { label: 'At least 8 characters', passed: password.length >= 8 },
+  { label: 'One uppercase letter (A-Z)', passed: /[A-Z]/.test(password) },
+  { label: 'One lowercase letter (a-z)', passed: /[a-z]/.test(password) },
+  { label: 'One number (0-9)', passed: /[0-9]/.test(password) },
+  { label: 'One special character (!@#$...)', passed: /[^A-Za-z0-9]/.test(password) },
+];
+
+const getStrengthLabel = (passed: number) => {
+  if (passed <= 1) return { label: 'Very Weak', color: 'bg-red-500' };
+  if (passed === 2) return { label: 'Weak', color: 'bg-orange-500' };
+  if (passed === 3) return { label: 'Fair', color: 'bg-yellow-500' };
+  if (passed === 4) return { label: 'Strong', color: 'bg-blue-400' };
+  return { label: 'Very Strong', color: 'bg-hero-accent' };
+};
 
 const SignUp = () => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [profession, setProfession] = useState('');
+  const [annualIncome, setAnnualIncome] = useState('');
+  const [error, setError] = useState('');
+  const [emailError, setEmailError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
-  const navigate = useNavigate();
-  const { register } = useAuth();
+  const passwordChecks = getPasswordChecks(password);
+  const passedCount = passwordChecks.filter(c => c.passed).length;
+  const strength = getStrengthLabel(passedCount);
+  const isPasswordStrong = passedCount === 5;
+
+  const validateEmail = (val: string) => {
+    const trimmed = val.trim().toLowerCase();
+    if (!trimmed.includes('@')) {
+      setEmailError('Please enter a valid email address');
+      return false;
+    }
+    const domain = trimmed.split('@')[1];
+    if (!domain) {
+      setEmailError('Please enter a valid email address');
+      return false;
+    }
+    if (!VALID_EMAIL_DOMAINS.includes(domain)) {
+      setEmailError('Please use a valid email provider (e.g. gmail.com, yahoo.com)');
+      return false;
+    }
+    const emailRegex = /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/;
+    if (!emailRegex.test(trimmed)) {
+      setEmailError('Invalid email format');
+      return false;
+    }
+    setEmailError('');
+    return true;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError('');
+    if (!validateEmail(email)) return;
+    if (!isPasswordStrong) {
+      setError('Please make sure your password meets all requirements');
+      return;
+    }
     setLoading(true);
-    setError(null);
     try {
-      await register(name, email, password);
-      navigate('/portfolio', { replace: true });
+      const res = await fetch('http://localhost:5000/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name,
+          email: email.trim().toLowerCase(),
+          password,
+          profession,
+          annualIncome,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || 'Registration failed');
+      localStorage.setItem('tp_token', data.token);
+      window.location.href = '/';
     } catch (err: any) {
-      setError(err.message || 'Registration failed');
+      setError(err.message);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: '#060d06' }}>
-      {/* Nav */}
-      <nav className="px-6 py-4 border-b border-white/10">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors">
-            <ArrowLeft className="w-4 h-4" />
-            <span className="text-sm">Back</span>
-          </Link>
-          <Link to="/" className="text-lg font-bold text-white">Traders Paradise</Link>
-          <div className="w-16" />
+    <div className="min-h-screen bg-hero-bg flex items-center justify-center px-4 py-10">
+      <div className="w-full max-w-md">
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-bold text-hero-text">Create Account</h1>
+          <p className="text-hero-text-muted mt-2">Join Traders Paradise today</p>
         </div>
-      </nav>
 
-      {/* Form */}
-      <div className="flex-1 flex items-center justify-center px-6">
-        <motion.div
-          className="w-full max-w-md"
-          initial={{ opacity: 0, y: 24 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-        >
-          <div className="p-8 rounded-2xl border border-white/10" style={{ background: '#0a1a0a' }}>
-            {/* Header */}
-            <div className="flex flex-col items-center mb-8">
-              <div className="w-14 h-14 rounded-xl flex items-center justify-center mb-4"
-                   style={{ background: 'rgba(74,222,128,0.12)', border: '1px solid rgba(74,222,128,0.25)' }}>
-                <UserPlus className="w-7 h-7" style={{ color: '#4ADE80' }} />
-              </div>
-              <h1 className="text-3xl font-bold text-white mb-1">Create Account</h1>
-              <p className="text-gray-400 text-sm">Start your trading journey today</p>
+        <div className="bg-hero-surface border border-hero-border rounded-2xl p-8">
+          {error && (
+            <div className="mb-4 p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm">{error}</div>
+          )}
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+
+            {/* Name */}
+            <div>
+              <label className="block text-sm text-hero-text-muted mb-1">Full Name</label>
+              <input type="text" value={name} onChange={e => setName(e.target.value)} required
+                className="w-full px-4 py-3 rounded-xl bg-hero-bg border border-hero-border text-hero-text focus:outline-none focus:border-hero-accent/50"
+                placeholder="Your full name" />
             </div>
 
-            {/* Error */}
-            {error && (
-              <motion.div
-                initial={{ opacity: 0, y: -8 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="mb-6 p-3 rounded-lg text-sm text-center text-red-300"
-                style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)' }}
-              >
-                {error}
-              </motion.div>
-            )}
+            {/* Email */}
+            <div>
+              <label className="block text-sm text-hero-text-muted mb-1">Email</label>
+              <input
+                type="email"
+                value={email}
+                onChange={e => { setEmail(e.target.value); if (emailError) validateEmail(e.target.value); }}
+                onBlur={() => validateEmail(email)}
+                required
+                className={`w-full px-4 py-3 rounded-xl bg-hero-bg border text-hero-text focus:outline-none transition-colors ${emailError ? 'border-red-500/50 focus:border-red-500' : 'border-hero-border focus:border-hero-accent/50'}`}
+                placeholder="you@gmail.com" />
+              {emailError && (
+                <p className="mt-1 text-xs text-red-400 flex items-center gap-1">
+                  <XCircle className="w-3 h-3" /> {emailError}
+                </p>
+              )}
+              {!emailError && email && email.includes('@') && (
+                <p className="mt-1 text-xs text-hero-accent flex items-center gap-1">
+                  <CheckCircle2 className="w-3 h-3" /> Valid email
+                </p>
+              )}
+            </div>
 
-            <form onSubmit={handleSubmit} className="space-y-4">
-              {/* Name */}
-              <div>
-                <label className="block text-xs font-medium text-gray-400 mb-1.5 ml-1">Full Name</label>
+            {/* Password */}
+            <div>
+              <label className="block text-sm text-hero-text-muted mb-1">Password</label>
+              <div className="relative">
                 <input
-                  type="text"
-                  placeholder="John Doe"
+                  type={showPassword ? 'text' : 'password'}
+                  value={password}
+                  onChange={e => setPassword(e.target.value)}
                   required
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="w-full px-4 py-3 rounded-xl text-white placeholder-gray-500 outline-none transition-colors"
-                  style={{ background: '#060d06', border: '1px solid rgba(255,255,255,0.1)' }}
-                  onFocus={(e) => e.currentTarget.style.borderColor = 'rgba(74,222,128,0.5)'}
-                  onBlur={(e) => e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'}
-                />
+                  className="w-full px-4 py-3 pr-12 rounded-xl bg-hero-bg border border-hero-border text-hero-text focus:outline-none focus:border-hero-accent/50"
+                  placeholder="Create a strong password" />
+                <button type="button" onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-hero-text-muted hover:text-hero-text">
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
               </div>
 
-              {/* Email */}
-              <div>
-                <label className="block text-xs font-medium text-gray-400 mb-1.5 ml-1">Email</label>
-                <input
-                  type="email"
-                  placeholder="you@example.com"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full px-4 py-3 rounded-xl text-white placeholder-gray-500 outline-none transition-colors"
-                  style={{ background: '#060d06', border: '1px solid rgba(255,255,255,0.1)' }}
-                  onFocus={(e) => e.currentTarget.style.borderColor = 'rgba(74,222,128,0.5)'}
-                  onBlur={(e) => e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'}
-                />
-              </div>
-
-              {/* Password */}
-              <div>
-                <label className="block text-xs font-medium text-gray-400 mb-1.5 ml-1">Password</label>
-                <div className="relative">
-                  <input
-                    type={showPassword ? 'text' : 'password'}
-                    placeholder="••••••••"
-                    required
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="w-full px-4 py-3 pr-11 rounded-xl text-white placeholder-gray-500 outline-none transition-colors"
-                    style={{ background: '#060d06', border: '1px solid rgba(255,255,255,0.1)' }}
-                    onFocus={(e) => e.currentTarget.style.borderColor = 'rgba(74,222,128,0.5)'}
-                    onBlur={(e) => e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'}
-                  />
-                  <button type="button" onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300 transition-colors">
-                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                  </button>
+              {/* Strength bar + checklist */}
+              {password && (
+                <div className="mt-2">
+                  <div className="flex gap-1 mb-1">
+                    {[1, 2, 3, 4, 5].map(i => (
+                      <div key={i} className={`h-1.5 flex-1 rounded-full transition-all duration-300 ${i <= passedCount ? strength.color : 'bg-hero-border'}`} />
+                    ))}
+                  </div>
+                  <p className="text-xs text-hero-text-muted mb-2">
+                    Strength: <span className={`font-semibold ${passedCount >= 4 ? 'text-hero-accent' : passedCount >= 3 ? 'text-yellow-400' : 'text-red-400'}`}>{strength.label}</span>
+                  </p>
+                  <div className="space-y-1">
+                    {passwordChecks.map((check) => (
+                      <p key={check.label} className={`text-xs flex items-center gap-1.5 ${check.passed ? 'text-hero-accent' : 'text-hero-text-muted'}`}>
+                        {check.passed
+                          ? <CheckCircle2 className="w-3 h-3 flex-shrink-0" />
+                          : <XCircle className="w-3 h-3 flex-shrink-0" />}
+                        {check.label}
+                      </p>
+                    ))}
+                  </div>
                 </div>
-              </div>
+              )}
+            </div>
 
-              {/* Submit */}
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full py-3 rounded-xl font-semibold text-sm transition-all disabled:opacity-50 mt-2"
-                style={{
-                  background: loading ? 'rgba(74,222,128,0.3)' : '#4ADE80',
-                  color: '#060d06',
-                }}
-                onMouseEnter={(e) => !loading && (e.currentTarget.style.background = '#3ECF72')}
-                onMouseLeave={(e) => !loading && (e.currentTarget.style.background = '#4ADE80')}
-              >
-                {loading ? (
-                  <span className="flex items-center justify-center gap-2">
-                    <span className="w-4 h-4 border-2 border-[#060d06] border-t-transparent rounded-full animate-spin" />
-                    Creating account...
-                  </span>
-                ) : 'Sign Up'}
-              </button>
-            </form>
+            {/* Profession */}
+            <div>
+              <label className="block text-sm text-hero-text-muted mb-1">Profession</label>
+              <select value={profession} onChange={e => setProfession(e.target.value)} required
+                className="w-full px-4 py-3 rounded-xl bg-hero-bg border border-hero-border text-hero-text focus:outline-none focus:border-hero-accent/50">
+                <option value="">Select your profession</option>
+                {PROFESSIONS.map(p => <option key={p} value={p}>{p}</option>)}
+              </select>
+            </div>
 
-            <p className="text-sm text-gray-400 text-center mt-6">
-              Already have an account?{' '}
-              <Link to="/signin" className="font-medium hover:underline" style={{ color: '#4ADE80' }}>
-                Sign In
-              </Link>
-            </p>
-          </div>
-        </motion.div>
+            {/* Annual Income */}
+            <div>
+              <label className="block text-sm text-hero-text-muted mb-1">Annual Income</label>
+              <select value={annualIncome} onChange={e => setAnnualIncome(e.target.value)} required
+                className="w-full px-4 py-3 rounded-xl bg-hero-bg border border-hero-border text-hero-text focus:outline-none focus:border-hero-accent/50">
+                <option value="">Select income range</option>
+                {INCOME_RANGES.map(i => <option key={i} value={i}>{i}</option>)}
+              </select>
+            </div>
+
+            <button type="submit" disabled={loading || !isPasswordStrong || !!emailError}
+              className="w-full py-3 rounded-xl bg-hero-accent text-hero-bg font-semibold hover:bg-hero-accent/80 transition-colors disabled:opacity-50 disabled:cursor-not-allowed mt-2">
+              {loading ? 'Creating Account...' : 'Create Account'}
+            </button>
+          </form>
+
+          <p className="text-center text-sm text-hero-text-muted mt-6">
+            Already have an account?{' '}
+            <Link to="/signin" className="text-hero-accent hover:underline">Sign In</Link>
+          </p>
+        </div>
       </div>
     </div>
   );

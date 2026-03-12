@@ -2,7 +2,7 @@ import { useState, useCallback, useRef, useEffect } from 'react';
 import { SectionLayout } from '@/components/SectionLayout';
 import { TrendingUp, TrendingDown, BarChart3, Globe, RefreshCw, Search, X, Loader2, Clock } from 'lucide-react';
 import { useMarketData } from '@/hooks/useMarketData';
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { createChart, ColorType, CandlestickSeries, HistogramSeries } from 'lightweight-charts';
 
 const NSE_STOCKS = [
   { symbol: 'RELIANCE', name: 'Reliance Industries' },
@@ -55,30 +55,211 @@ const RANGES = [
   { label: '1Y', interval: '1wk', range: '1y'  },
 ];
 
+const PRO_RANGES = [
+  { label: '1D', interval: '5m',  range: '1d'  },
+  { label: '1W', interval: '15m', range: '5d'  },
+  { label: '1M', interval: '1d',  range: '1mo' },
+  { label: '3M', interval: '1d',  range: '3mo' },
+  { label: '6M', interval: '1wk', range: '6mo' },
+  { label: '1Y', interval: '1wk', range: '1y'  },
+];
+
 interface SearchResult {
   name: string; symbol: string; value: string;
   change: string; up: boolean;
   high: string; low: string; open: string;
 }
 
-interface ChartPoint { time: string; price: number; }
+interface CandlePoint {
+  time: number;
+  open: number;
+  high: number;
+  low: number;
+  close: number;
+  volume?: number;
+}
 
-// ── Custom tooltip ──────────────────────────────────────────────────────────
-const CustomTooltip = ({ active, payload, label }: any) => {
-  if (active && payload && payload.length) {
-    return (
-      <div className="bg-hero-surface border border-hero-border rounded-lg px-3 py-2 text-xs shadow-xl">
-        <p className="text-hero-text-muted mb-1">{label}</p>
-        <p className="text-hero-accent font-bold">₹{payload[0].value.toLocaleString('en-IN', { maximumFractionDigits: 2 })}</p>
+const ProChart = ({ symbol }: { symbol: string }) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const chartRef = useRef<any>(null);
+  const candleRef = useRef<any>(null);
+  const volumeRef = useRef<any>(null);
+  const [activeRange, setActiveRange] = useState('1M');
+  const [loading, setLoading] = useState(false);
+  const [chartType, setChartType] = useState<'candle' | 'line'>('candle');
+  const [ohlc, setOhlc] = useState({ o: 0, h: 0, l: 0, c: 0, v: 0 });
+
+  const fetchCandles = useCallback(async (sym: string, range: string) => {
+    setLoading(true);
+    const r = PRO_RANGES.find(r => r.label === range) || PRO_RANGES[2];
+    const nsSymbol = `${sym}.NS`;
+    try {
+      const res = await fetch(`/yahoo-finance/v8/finance/chart/${nsSymbol}?interval=${r.interval}&range=${r.range}`);
+      const data = await res.json();
+      const result = data?.chart?.result?.[0];
+      if (!result) return;
+      const timestamps: number[] = result.timestamp ?? [];
+      const quote = result.indicators?.quote?.[0] ?? {};
+      const opens: number[] = quote.open ?? [];
+      const highs: number[] = quote.high ?? [];
+      const lows: number[] = quote.low ?? [];
+      const closes: number[] = quote.close ?? [];
+      const volumes: number[] = quote.volume ?? [];
+      const candles: CandlePoint[] = timestamps
+        .map((ts, i) => ({ time: ts, open: opens[i], high: highs[i], low: lows[i], close: closes[i], volume: volumes[i] }))
+        .filter(c => c.open && c.high && c.low && c.close)
+        .sort((a, b) => a.time - b.time);
+      if (candles.length > 0) {
+        const last = candles[candles.length - 1];
+        setOhlc({ o: last.open, h: last.high, l: last.low, c: last.close, v: last.volume ?? 0 });
+      }
+      return candles;
+    } catch { return []; }
+    finally { setLoading(false); }
+  }, []);
+
+  useEffect(() => {
+    if (!containerRef.current) return;
+    const chart = createChart(containerRef.current, {
+      layout: {
+        background: { type: ColorType.Solid, color: 'transparent' },
+        textColor: 'rgba(255,255,255,0.35)',
+        fontSize: 11,
+      },
+      grid: {
+        vertLines: { color: 'rgba(255,255,255,0.04)' },
+        horzLines: { color: 'rgba(255,255,255,0.04)' },
+      },
+      crosshair: {
+        mode: 1,
+        vertLine: { color: 'rgba(74,222,128,0.3)', width: 1, style: 3 },
+        horzLine: { color: 'rgba(74,222,128,0.3)', width: 1, style: 3 },
+      },
+      rightPriceScale: {
+        borderColor: 'rgba(255,255,255,0.06)',
+        scaleMargins: { top: 0.1, bottom: 0.25 },
+      },
+      timeScale: { borderColor: 'rgba(255,255,255,0.06)', timeVisible: true, secondsVisible: false },
+      handleScroll: true,
+      handleScale: true,
+    });
+    const candleSeries = chart.addSeries(CandlestickSeries, {
+      upColor: '#4ADE80',
+      downColor: '#F87171',
+      borderUpColor: '#4ADE80',
+      borderDownColor: '#F87171',
+      wickUpColor: '#4ADE80',
+      wickDownColor: '#F87171',
+    });
+    const volumeSeries = chart.addSeries(HistogramSeries, {
+      priceFormat: { type: 'volume' },
+      priceScaleId: 'volume',
+    });
+    chart.priceScale('volume').applyOptions({ scaleMargins: { top: 0.8, bottom: 0 } });
+    chartRef.current = chart;
+    candleRef.current = candleSeries;
+    volumeRef.current = volumeSeries;
+    const ro = new ResizeObserver(() => {
+      if (containerRef.current) {
+        chart.applyOptions({ width: containerRef.current.clientWidth, height: containerRef.current.clientHeight });
+      }
+    });
+    ro.observe(containerRef.current);
+    chart.subscribeCrosshairMove((param) => {
+      if (param.seriesData && candleSeries) {
+        const d = param.seriesData.get(candleSeries) as any;
+        if (d) setOhlc({ o: d.open, h: d.high, l: d.low, c: d.close, v: 0 });
+      }
+    });
+    return () => { ro.disconnect(); chart.remove(); };
+  }, []);
+
+  useEffect(() => {
+    if (!candleRef.current || !volumeRef.current) return;
+    fetchCandles(symbol, activeRange).then(candles => {
+      if (!candles || !candleRef.current) return;
+      candleRef.current.setData(candles.map(c => ({ time: c.time, open: c.open, high: c.high, low: c.low, close: c.close })));
+      volumeRef.current.setData(candles.map(c => ({ time: c.time, value: c.volume ?? 0, color: c.close >= c.open ? 'rgba(74,222,128,0.4)' : 'rgba(248,113,113,0.4)' })));
+      chartRef.current?.timeScale().fitContent();
+    });
+  }, [symbol, activeRange, fetchCandles]);
+
+  const fmt = (n: number) => n ? '₹' + n.toLocaleString('en-IN', { maximumFractionDigits: 2 }) : '-';
+
+  return (
+    <div className="rounded-xl bg-hero-surface border border-hero-border overflow-hidden">
+      <div className="flex items-center justify-between px-5 py-3 border-b border-hero-border flex-wrap gap-3">
+        <div className="flex items-center gap-3">
+          <BarChart3 className="w-4 h-4 text-hero-accent" />
+          <span className="text-sm font-bold text-hero-text">{symbol}</span>
+          <span className="text-xs text-hero-text-muted">Candlestick Chart · NSE</span>
+        </div>
+        <div className="flex items-center gap-2 flex-wrap">
+          <div className="flex gap-1 border border-hero-border rounded-lg p-0.5">
+            <button onClick={() => setChartType('candle')}
+              className={`px-2.5 py-1 rounded-md text-xs font-semibold transition-colors ${chartType === 'candle' ? 'bg-hero-accent text-hero-bg' : 'text-hero-text-muted hover:text-hero-text'}`}>
+              Candle
+            </button>
+            <button onClick={() => setChartType('line')}
+              className={`px-2.5 py-1 rounded-md text-xs font-semibold transition-colors ${chartType === 'line' ? 'bg-hero-accent text-hero-bg' : 'text-hero-text-muted hover:text-hero-text'}`}>
+              Line
+            </button>
+          </div>
+          <div className="flex gap-1">
+            {PRO_RANGES.map(r => (
+              <button key={r.label} onClick={() => setActiveRange(r.label)}
+                className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-colors ${activeRange === r.label ? 'bg-hero-accent text-hero-bg' : 'text-hero-text-muted hover:text-hero-text hover:bg-hero-accent/10'}`}>
+                {r.label}
+              </button>
+            ))}
+          </div>
+        </div>
       </div>
-    );
-  }
-  return null;
+      <div className="flex gap-6 px-5 py-2 border-b border-hero-border/50 flex-wrap">
+        {[['O', ohlc.o], ['H', ohlc.h], ['L', ohlc.l], ['C', ohlc.c]].map(([l, v]) => (
+          <div key={l as string} className="flex items-center gap-1.5">
+            <span className="text-xs text-hero-text-muted">{l}</span>
+            <span className="text-xs font-semibold text-hero-text">{fmt(v as number)}</span>
+          </div>
+        ))}
+        <div className="flex items-center gap-1.5">
+          <span className="text-xs text-hero-text-muted">Vol</span>
+          <span className="text-xs font-semibold text-hero-text">
+            {ohlc.v > 1e7 ? (ohlc.v / 1e7).toFixed(2) + 'Cr' : ohlc.v > 1e5 ? (ohlc.v / 1e5).toFixed(2) + 'L' : ohlc.v.toLocaleString('en-IN')}
+          </span>
+        </div>
+      </div>
+      <div className="relative" style={{ height: 460 }}>
+        {loading && (
+          <div className="absolute inset-0 flex items-center justify-center z-10 bg-hero-bg/40">
+            <Loader2 className="w-6 h-6 animate-spin text-hero-accent" />
+          </div>
+        )}
+        <div ref={containerRef} style={{ width: '100%', height: '100%' }} />
+      </div>
+      <div className="flex gap-2 px-5 py-3 border-t border-hero-border flex-wrap">
+        <span className="text-xs text-hero-text-muted self-center">Switch:</span>
+        {['RELIANCE','TCS','HDFCBANK','INFY','SBIN','TATAMOTORS','WIPRO','BAJFINANCE'].map(s => (
+          <button key={s} onClick={() => {
+            if (candleRef.current) candleRef.current.setData([]);
+            fetchCandles(s, activeRange).then(candles => {
+              if (!candles || !candleRef.current) return;
+              candleRef.current.setData(candles.map(c => ({ time: c.time, open: c.open, high: c.high, low: c.low, close: c.close })));
+              volumeRef.current?.setData(candles.map(c => ({ time: c.time, value: c.volume ?? 0, color: c.close >= c.open ? 'rgba(74,222,128,0.4)' : 'rgba(248,113,113,0.4)' })));
+              chartRef.current?.timeScale().fitContent();
+            });
+          }}
+            className={`text-xs px-2.5 py-1 rounded-lg border transition-colors ${symbol === s ? 'border-hero-accent text-hero-accent bg-hero-accent/10' : 'border-hero-border text-hero-text-muted hover:border-hero-accent/40 hover:text-hero-accent'}`}>
+            {s}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
 };
 
 const Markets = () => {
   const { marketData, loading, lastUpdated } = useMarketData();
-
   const [query, setQuery] = useState('');
   const [searchResult, setSearchResult] = useState<SearchResult | null>(null);
   const [searching, setSearching] = useState(false);
@@ -89,15 +270,15 @@ const Markets = () => {
     try { return JSON.parse(localStorage.getItem('tp_recent_searches') || '[]'); }
     catch { return []; }
   });
-
-  // Chart state
-  const [chartData, setChartData] = useState<ChartPoint[]>([]);
   const [chartLoading, setChartLoading] = useState(false);
   const [activeRange, setActiveRange] = useState('1D');
   const [chartSymbol, setChartSymbol] = useState('');
-
+  const [proSymbol, setProSymbol] = useState('RELIANCE');
   const inputRef = useRef<HTMLInputElement>(null);
   const suggestionsRef = useRef<HTMLDivElement>(null);
+  const simpleChartRef = useRef<HTMLDivElement>(null);
+  const simpleChartInstance = useRef<any>(null);
+  const simpleSeriesRef = useRef<any>(null);
 
   const suggestions = query.length > 0
     ? NSE_STOCKS.filter(s =>
@@ -117,33 +298,54 @@ const Markets = () => {
     return () => document.removeEventListener('mousedown', handler);
   }, []);
 
-  const fetchChart = useCallback(async (symbol: string, range: string) => {
+  useEffect(() => {
+    if (!simpleChartRef.current) return;
+    const chart = createChart(simpleChartRef.current, {
+      layout: {
+        background: { type: ColorType.Solid, color: 'transparent' },
+        textColor: 'rgba(255,255,255,0.35)',
+        fontSize: 10,
+      },
+      grid: {
+        vertLines: { color: 'rgba(255,255,255,0.04)' },
+        horzLines: { color: 'rgba(255,255,255,0.04)' },
+      },
+      rightPriceScale: { borderColor: 'rgba(255,255,255,0.06)' },
+      timeScale: { borderColor: 'rgba(255,255,255,0.06)', timeVisible: true },
+      handleScroll: true,
+      handleScale: true,
+    });
+    const { LineSeries } = require('lightweight-charts');
+    const series = chart.addSeries(LineSeries, { color: '#4ADE80', lineWidth: 2, priceLineVisible: false });
+    simpleChartInstance.current = chart;
+    simpleSeriesRef.current = series;
+    const ro = new ResizeObserver(() => {
+      if (simpleChartRef.current) {
+        chart.applyOptions({ width: simpleChartRef.current.clientWidth, height: simpleChartRef.current.clientHeight });
+      }
+    });
+    ro.observe(simpleChartRef.current);
+    return () => { ro.disconnect(); chart.remove(); };
+  }, []);
+
+  const fetchSimpleChart = useCallback(async (symbol: string, range: string) => {
     setChartLoading(true);
     const r = RANGES.find(r => r.label === range) || RANGES[0];
-    const nsSymbol = symbol.includes('.') ? symbol : `${symbol}.NS`;
+    const nsSymbol = `${symbol}.NS`;
     try {
-      const res = await fetch(
-        `/yahoo-finance/v8/finance/chart/${nsSymbol}?interval=${r.interval}&range=${r.range}`
-      );
+      const res = await fetch(`/yahoo-finance/v8/finance/chart/${nsSymbol}?interval=${r.interval}&range=${r.range}`);
       const data = await res.json();
       const result = data?.chart?.result?.[0];
-      if (!result) return;
-
+      if (!result || !simpleSeriesRef.current) return;
       const timestamps: number[] = result.timestamp ?? [];
       const closes: number[] = result.indicators?.quote?.[0]?.close ?? [];
-
-      const points: ChartPoint[] = timestamps
-        .map((ts, i) => ({
-          time: new Date(ts * 1000).toLocaleTimeString('en-IN', {
-            hour: '2-digit', minute: '2-digit',
-            ...(range !== '1D' ? { month: 'short', day: 'numeric' } : {}),
-          }),
-          price: closes[i],
-        }))
-        .filter(p => p.price != null && !isNaN(p.price));
-
-      setChartData(points);
-    } catch { /* silent */ }
+      const points = timestamps
+        .map((ts, i) => ({ time: ts, value: closes[i] }))
+        .filter(p => p.value != null && !isNaN(p.value))
+        .sort((a, b) => a.time - b.time);
+      simpleSeriesRef.current.setData(points);
+      simpleChartInstance.current?.timeScale().fitContent();
+    } catch { }
     finally { setChartLoading(false); }
   }, []);
 
@@ -156,14 +358,11 @@ const Markets = () => {
   const handleSearch = useCallback(async (raw: string) => {
     const input = raw.trim().toUpperCase();
     if (!input) return;
-
     setShowSuggestions(false);
     setSearching(true);
     setSearchError('');
     setSearchResult(null);
-    setChartData([]);
     saveRecentSearch(input);
-
     const attempts = [`${input}.NS`, `${input}.BO`, input];
     for (const symbol of attempts) {
       try {
@@ -171,13 +370,11 @@ const Markets = () => {
         const data = await res.json();
         const meta = data?.chart?.result?.[0]?.meta;
         if (!meta || !meta.regularMarketPrice) continue;
-
         const price: number = meta.regularMarketPrice;
         const prev: number = meta.chartPreviousClose ?? meta.previousClose;
         const changePct = ((price - prev) / prev) * 100;
         const up = changePct >= 0;
         const fmt = (n: number) => '₹' + n.toLocaleString('en-IN', { maximumFractionDigits: 2 });
-
         setSearchResult({
           name: meta.shortName ?? meta.symbol ?? input,
           symbol: meta.symbol ?? symbol,
@@ -188,31 +385,29 @@ const Markets = () => {
           low: fmt(meta.regularMarketDayLow ?? price),
           open: fmt(meta.regularMarketOpen ?? price),
         });
-
-        // Load chart
         const cleanSymbol = (meta.symbol ?? symbol).replace('.NS', '').replace('.BO', '');
         setChartSymbol(cleanSymbol);
+        setProSymbol(cleanSymbol);
         setActiveRange('1D');
-        fetchChart(cleanSymbol, '1D');
-
+        fetchSimpleChart(cleanSymbol, '1D');
         setSearching(false);
         return;
       } catch { continue; }
     }
-
     setSearchError(`No results for "${input}". Try TATAMOTORS, ADANIENT, BAJFINANCE.`);
     setSearching(false);
-  }, [recentSearches, fetchChart]);
+  }, [recentSearches, fetchSimpleChart]);
 
   const handleRangeChange = (range: string) => {
     setActiveRange(range);
-    if (chartSymbol) fetchChart(chartSymbol, range);
+    if (chartSymbol) fetchSimpleChart(chartSymbol, range);
   };
 
   const clearSearch = () => {
     setQuery(''); setSearchResult(null); setSearchError('');
     setShowSuggestions(false); setSelectedIndex(-1);
-    setChartData([]); setChartSymbol('');
+    setChartSymbol('');
+    if (simpleSeriesRef.current) simpleSeriesRef.current.setData([]);
     inputRef.current?.focus();
   };
 
@@ -228,14 +423,10 @@ const Markets = () => {
   };
 
   const isUp = searchResult?.up ?? true;
-  const chartColor = isUp ? '#4ADE80' : '#EF4444';
-  const minPrice = chartData.length ? Math.min(...chartData.map(d => d.price)) * 0.999 : 0;
-  const maxPrice = chartData.length ? Math.max(...chartData.map(d => d.price)) * 1.001 : 0;
 
   return (
     <SectionLayout title="Markets" subtitle="Real-time Indian market data — NSE & BSE indices and top stocks.">
 
-      {/* ── Search ── */}
       <div className="mb-8 relative">
         <div className="flex gap-3 items-center">
           <div className="relative flex-1 max-w-lg">
@@ -255,8 +446,6 @@ const Markets = () => {
                 <X className="w-4 h-4" />
               </button>
             )}
-
-            {/* Suggestions dropdown */}
             {showSuggestions && (suggestions.length > 0 || (query === '' && recentSearches.length > 0)) && (
               <div ref={suggestionsRef} className="absolute top-full left-0 right-0 mt-1 rounded-xl bg-hero-surface border border-hero-border shadow-xl z-50 overflow-hidden">
                 {query === '' && recentSearches.length > 0 && (
@@ -291,15 +480,12 @@ const Markets = () => {
               </div>
             )}
           </div>
-
           <button onClick={() => handleSearch(query)} disabled={!query || searching}
             className="px-4 py-2.5 bg-hero-accent text-hero-bg text-sm font-semibold rounded-xl hover:bg-hero-accent/80 disabled:opacity-40 disabled:cursor-not-allowed transition-colors flex items-center gap-2">
             {searching ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
             {searching ? 'Searching...' : 'Search'}
           </button>
         </div>
-
-        {/* Quick chips */}
         <div className="flex flex-wrap gap-2 mt-3">
           <span className="text-xs text-hero-text-muted self-center">Quick:</span>
           {['TATAMOTORS','BAJFINANCE','ADANIENT','HCLTECH','MARUTI','SUNPHARMA','SBIN','TITAN'].map(s => (
@@ -311,16 +497,13 @@ const Markets = () => {
         </div>
       </div>
 
-      {/* ── Error ── */}
       {searchError && (
         <div className="mb-6 p-4 rounded-xl border border-red-500/20 bg-red-500/5 text-red-400 text-sm">{searchError}</div>
       )}
 
-      {/* ── Search result + Chart ── */}
       {searchResult && (
         <div className="mb-8 rounded-xl bg-hero-surface border border-hero-accent/30 overflow-hidden">
-          {/* Header */}
-          <div className="p-5 flex items-start justify-between">
+          <div className="p-5 flex items-start justify-between flex-wrap gap-4">
             <div>
               <p className="text-xs text-hero-text-muted mb-1">{searchResult.symbol}</p>
               <h3 className="text-xl font-bold text-hero-text">{searchResult.name}</h3>
@@ -346,8 +529,6 @@ const Markets = () => {
               </button>
             </div>
           </div>
-
-          {/* Range selector */}
           <div className="flex gap-1 px-5 mb-3">
             {RANGES.map(r => (
               <button key={r.label} onClick={() => handleRangeChange(r.label)}
@@ -356,48 +537,26 @@ const Markets = () => {
               </button>
             ))}
           </div>
-
-          {/* Chart */}
-          <div className="h-56 px-2 pb-4">
-            {chartLoading ? (
-              <div className="h-full flex items-center justify-center">
-                <Loader2 className="w-6 h-6 animate-spin text-hero-accent" />
-              </div>
-            ) : chartData.length > 0 ? (
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={chartData} margin={{ top: 5, right: 10, left: 0, bottom: 0 }}>
-                  <defs>
-                    <linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor={chartColor} stopOpacity={0.3}/>
-                      <stop offset="95%" stopColor={chartColor} stopOpacity={0}/>
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
-                  <XAxis dataKey="time" tick={{ fontSize: 10, fill: '#6B7280' }} tickLine={false} axisLine={false}
-                    interval={Math.floor(chartData.length / 5)} />
-                  <YAxis domain={[minPrice, maxPrice]} tick={{ fontSize: 10, fill: '#6B7280' }} tickLine={false}
-                    axisLine={false} tickFormatter={v => '₹' + v.toLocaleString('en-IN', { maximumFractionDigits: 0 })} width={70} />
-                  <Tooltip content={<CustomTooltip />} />
-                  <Area type="monotone" dataKey="price" stroke={chartColor} strokeWidth={2}
-                    fill="url(#chartGrad)" dot={false} activeDot={{ r: 4, fill: chartColor }} />
-                </AreaChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="h-full flex items-center justify-center text-hero-text-muted text-sm">
-                No chart data available
+          <div className="relative h-48 px-2 pb-4">
+            {chartLoading && (
+              <div className="absolute inset-0 flex items-center justify-center z-10">
+                <Loader2 className="w-5 h-5 animate-spin text-hero-accent" />
               </div>
             )}
+            <div ref={simpleChartRef} style={{ width: '100%', height: '100%' }} />
           </div>
         </div>
       )}
 
-      {/* ── Refresh ── */}
+      <div className="mb-8">
+        <ProChart symbol={proSymbol} />
+      </div>
+
       <div className="flex items-center gap-2 mb-4 text-xs text-hero-text-muted">
         <RefreshCw className={`w-3 h-3 ${loading ? 'animate-spin' : ''}`} />
         {lastUpdated ? `Last updated: ${lastUpdated.toLocaleTimeString()}` : 'Fetching live data...'}
       </div>
 
-      {/* ── Market cards ── */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {loading
           ? Array.from({ length: 12 }).map((_, i) => (
@@ -420,7 +579,6 @@ const Markets = () => {
             ))}
       </div>
 
-      {/* ── Bottom cards ── */}
       <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="p-6 rounded-xl bg-hero-surface border border-hero-border">
           <BarChart3 className="w-8 h-8 text-hero-accent mb-4" />

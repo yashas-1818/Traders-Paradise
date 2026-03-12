@@ -25,7 +25,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [token, setToken] = useState<string | null>(localStorage.getItem(TOKEN_KEY));
   const [isLoading, setIsLoading] = useState(true);
 
-  // Auto-login: if token exists, fetch user info
   useEffect(() => {
     const fetchUser = async () => {
       if (!token) { setIsLoading(false); return; }
