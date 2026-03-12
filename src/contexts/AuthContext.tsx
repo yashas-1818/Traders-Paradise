@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 
-const API = 'http://localhost:5000/api/auth';
+const API = 'https://traders-paradise-3.onrender.com/api/auth';
 const TOKEN_KEY = 'tp_token';
 
 interface User {

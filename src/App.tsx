@@ -13,7 +13,7 @@ import SignIn from "./pages/SignIn";
 import SignUp from "./pages/SignUp";
 import Prediction from "./pages/Prediction";
 import NotFound from "./pages/NotFound";
-import Admin from "./pages/Admin";
+import Admin from "./pages/admin";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 

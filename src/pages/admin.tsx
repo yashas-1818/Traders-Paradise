@@ -30,7 +30,7 @@ const Admin = () => {
   const fetchStats = async () => {
     setLoading(true);
     try {
-      const res = await fetch('http://localhost:5000/api/admin/stats', {
+     const res = await fetch('https://traders-paradise-3.onrender.com/api/admin/stats', {
         headers: { 'x-admin-key': ADMIN_KEY },
       });
       if (!res.ok) throw new Error('Unauthorized');

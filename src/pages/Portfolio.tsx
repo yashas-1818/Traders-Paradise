@@ -18,7 +18,7 @@ interface EnrichedHolding extends Holding {
   changePct: number | null;
 }
 
-const API = 'http://localhost:5000/api';
+const API = 'https://traders-paradise-3.onrender.com/api';
 
 async function fetchLivePrice(symbol: string): Promise<{ price: number; changePct: number } | null> {
   const clean = symbol.replace('.NS', '').replace('.BO', '').toUpperCase();
