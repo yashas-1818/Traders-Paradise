@@ -94,7 +94,7 @@ const ProChart = ({ symbol }: { symbol: string }) => {
     const r = PRO_RANGES.find(r => r.label === range) || PRO_RANGES[2];
     const nsSymbol = `${sym}.NS`;
     try {
-      const res = await fetch(`/yahoo-finance/v8/finance/chart/${nsSymbol}?interval=${r.interval}&range=${r.range}`);
+      const res = await fetch(`https://traders-paradise-3.onrender.com/yahoo-finance/v8/finance/chart/${nsSymbol}?interval=${r.interval}&range=${r.range}`);
       const data = await res.json();
       const result = data?.chart?.result?.[0];
       if (!result) return;
@@ -333,7 +333,7 @@ const Markets = () => {
     const r = RANGES.find(r => r.label === range) || RANGES[0];
     const nsSymbol = `${symbol}.NS`;
     try {
-      const res = await fetch(`/yahoo-finance/v8/finance/chart/${nsSymbol}?interval=${r.interval}&range=${r.range}`);
+      const res = await fetch(`https://traders-paradise-3.onrender.com/yahoo-finance/v8/finance/chart/${nsSymbol}?interval=${r.interval}&range=${r.range}`);
       const data = await res.json();
       const result = data?.chart?.result?.[0];
       if (!result || !simpleSeriesRef.current) return;
@@ -366,7 +366,7 @@ const Markets = () => {
     const attempts = [`${input}.NS`, `${input}.BO`, input];
     for (const symbol of attempts) {
       try {
-        const res = await fetch(`/yahoo-finance/v8/finance/chart/${symbol}`);
+        const res = await fetch(`https://traders-paradise-3.onrender.com/yahoo-finance/v8/finance/chart/${symbol}`);
         const data = await res.json();
         const meta = data?.chart?.result?.[0]?.meta;
         if (!meta || !meta.regularMarketPrice) continue;

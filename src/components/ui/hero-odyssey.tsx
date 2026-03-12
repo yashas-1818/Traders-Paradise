@@ -21,9 +21,9 @@ function useLiveTickers() {
   async function fetchTickers() {
     try {
       const [niftyRes, sensexRes, relianceRes] = await Promise.all([
-        fetch('/yahoo-finance/v8/finance/chart/%5ENSEI'),
-        fetch('/yahoo-finance/v8/finance/chart/%5EBSESN'),
-        fetch('/yahoo-finance/v8/finance/chart/RELIANCE.NS'),
+        fetch('https://traders-paradise-3.onrender.com/yahoo-finance/v8/finance/chart/%5ENSEI'),
+        fetch('https://traders-paradise-3.onrender.com/yahoo-finance/v8/finance/chart/%5EBSESN'),
+        fetch('https://traders-paradise-3.onrender.com/yahoo-finance/v8/finance/chart/RELIANCE.NS'),
       ]);
       const [niftyData, sensexData, relianceData] = await Promise.all([
         niftyRes.json(), sensexRes.json(), relianceRes.json(),
