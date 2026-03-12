@@ -3,6 +3,7 @@ import { SectionLayout } from '@/components/SectionLayout';
 import { Search, Loader2, TrendingUp, TrendingDown, Minus, Brain, BarChart2, AlertTriangle, Zap } from 'lucide-react';
 import { usePrediction } from '@/hooks/usePrediction';
 import { ComposedChart, Area, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
+import { ServerStatusBanner } from '@/components/ServerStatusBanner';
 
 const AnimatedBar = ({ score, color, delay = 0, started }: { score: number; color: string; delay?: number; started: boolean }) => {
   const [width, setWidth] = useState(0);
@@ -109,6 +110,7 @@ const Prediction = () => {
 
   return (
     <SectionLayout title="Stock Prediction" subtitle="AI-powered technical analysis + Claude sentiment scoring for Indian markets.">
+      <ServerStatusBanner />
 
       {/* Search */}
       <div className="flex gap-3 mb-5 max-w-xl">

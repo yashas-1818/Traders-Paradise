@@ -3,6 +3,7 @@ import { SectionLayout } from '@/components/SectionLayout';
 import { TrendingUp, TrendingDown, BarChart3, Globe, RefreshCw, Search, X, Loader2, Clock } from 'lucide-react';
 import { useMarketData } from '@/hooks/useMarketData';
 import { createChart, ColorType, CandlestickSeries, HistogramSeries } from 'lightweight-charts';
+import { ServerStatusBanner } from '@/components/ServerStatusBanner';
 
 const NSE_STOCKS = [
   { symbol: 'RELIANCE', name: 'Reliance Industries' },
@@ -426,6 +427,7 @@ const Markets = () => {
 
   return (
     <SectionLayout title="Markets" subtitle="Real-time Indian market data — NSE & BSE indices and top stocks.">
+      <ServerStatusBanner showWakeUp />
 
       <div className="mb-8 relative">
         <div className="flex gap-3 items-center">

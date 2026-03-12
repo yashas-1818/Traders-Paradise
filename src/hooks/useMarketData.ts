@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { notifyServerError } from '@/components/ServerStatusBanner';
 
 const SYMBOLS = [
   { name: 'NIFTY 50',      symbol: '%5ENSEI',       isIndex: true  },
@@ -24,7 +25,7 @@ export interface MarketItem {
 
 async function fetchSymbol(symbol: string, name: string, isIndex: boolean): Promise<MarketItem | null> {
   try {
-    const res = await fetch(`/yahoo-finance/v8/finance/chart/${symbol}`);
+    const res = await fetch(`https://traders-paradise-3.onrender.com/yahoo-finance/v8/finance/chart/${symbol}`);
     const data = await res.json();
     const meta = data?.chart?.result?.[0]?.meta;
     if (!meta) return null;
@@ -40,6 +41,7 @@ async function fetchSymbol(symbol: string, name: string, isIndex: boolean): Prom
 
     return { name, value: formatted, change: (up ? '+' : '') + changePct.toFixed(2) + '%', up };
   } catch {
+    notifyServerError();
     return null;
   }
 }

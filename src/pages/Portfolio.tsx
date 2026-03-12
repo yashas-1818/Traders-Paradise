@@ -3,6 +3,7 @@ import { SectionLayout } from '@/components/SectionLayout';
 import { PieChart, Wallet, ArrowUpRight, BarChart2, Plus, Trash2, RefreshCw } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import axios from 'axios';
+import { ServerStatusBanner } from '@/components/ServerStatusBanner';
 
 interface Holding {
   _id: string;
@@ -124,6 +125,7 @@ const Portfolio = () => {
 
   return (
     <SectionLayout title="Portfolio" subtitle="Track and manage your investments in one place.">
+      <ServerStatusBanner />
 
       {/* ── Summary Cards ── */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
