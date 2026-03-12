@@ -9,9 +9,9 @@ app.use(cors());
 app.use(express.json());
 
 // Yahoo Finance proxy
-app.get('/yahoo-finance/*', async (req, res) => {
+app.get('/yahoo-finance/:path(*)', async (req, res) => {
   try {
-    const path = req.path.replace('/yahoo-finance', '');
+    const path = '/' + req.params.path;
     const query = req.url.includes('?') ? req.url.substring(req.url.indexOf('?')) : '';
     const url = `https://query1.finance.yahoo.com${path}${query}`;
     const response = await axios.get(url, {
