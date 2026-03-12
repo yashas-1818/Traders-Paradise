@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
+const axios = require('axios');
 
 const app = express();
 app.use(cors());
@@ -13,14 +14,10 @@ app.get('/yahoo-finance/*', async (req, res) => {
     const path = req.path.replace('/yahoo-finance', '');
     const query = req.url.includes('?') ? req.url.substring(req.url.indexOf('?')) : '';
     const url = `https://query1.finance.yahoo.com${path}${query}`;
-    const response = await fetch(url, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0',
-        'Accept': 'application/json',
-      }
+    const response = await axios.get(url, {
+      headers: { 'User-Agent': 'Mozilla/5.0' }
     });
-    const data = await response.json();
-    res.json(data);
+    res.json(response.data);
   } catch (err) {
     res.status(500).json({ error: 'Yahoo Finance fetch failed' });
   }
