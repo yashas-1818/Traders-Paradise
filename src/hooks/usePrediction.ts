@@ -80,7 +80,7 @@ export const usePrediction = () => {
       const symbol = input.trim().toUpperCase();
       const nsSymbol = symbol.includes('.') ? symbol : `${symbol}.NS`;
 
-      const res = await fetch(`https://traders-paradise-3.onrender.com/yahoo-finance/v8/finance/chart/${nsSymbol}?interval=1d&range=3mo`);
+      const res = await fetch(`https://traders-paradise-3.onrender.com/yahoo-finance/chart/${nsSymbol}?interval=1d&range=3mo`);
       const data = await res.json();
       const chartResult = data?.chart?.result?.[0];
       if (!chartResult) throw new Error(`Stock "${symbol}" not found. Try adding .NS or .BO`);

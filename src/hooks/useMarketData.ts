@@ -25,7 +25,7 @@ export interface MarketItem {
 
 async function fetchSymbol(symbol: string, name: string, isIndex: boolean): Promise<MarketItem | null> {
   try {
-    const res = await fetch(`https://traders-paradise-3.onrender.com/yahoo-finance/v8/finance/chart/${symbol}`);
+    const res = await fetch(`https://traders-paradise-3.onrender.com/yahoo-finance/chart/${symbol}`);
     const data = await res.json();
     const meta = data?.chart?.result?.[0]?.meta;
     if (!meta) return null;

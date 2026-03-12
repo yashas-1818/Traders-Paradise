@@ -9,13 +9,12 @@ app.use(cors());
 app.use(express.json());
 
 // Yahoo Finance proxy
-app.get('/yahoo-finance/:path(*)', async (req, res) => {
+app.use('/yahoo-finance', async (req, res) => {
   try {
-    const path = '/' + req.params.path;
-    const query = req.url.includes('?') ? req.url.substring(req.url.indexOf('?')) : '';
-    const url = `https://query1.finance.yahoo.com${path}${query}`;
+    const targetPath = req.url;
+    const url = `https://query1.finance.yahoo.com/v8/finance${targetPath}`;
     const response = await axios.get(url, {
-      headers: { 'User-Agent': 'Mozilla/5.0' }
+      headers: { 'User-Agent': 'Mozilla/5.0', 'Accept': 'application/json' }
     });
     res.json(response.data);
   } catch (err) {

@@ -26,7 +26,7 @@ async function fetchLivePrice(symbol: string): Promise<{ price: number; changePc
   const attempts = [`${clean}.NS`, `${clean}.BO`, clean];
   for (const sym of attempts) {
     try {
-      const res = await fetch(`https://traders-paradise-3.onrender.com/yahoo-finance/v8/finance/chart/${sym}`);
+      const res = await fetch(`https://traders-paradise-3.onrender.com/yahoo-finance/chart/${sym}`);
       const data = await res.json();
       const meta = data?.chart?.result?.[0]?.meta;
       if (!meta || !meta.regularMarketPrice) continue;
