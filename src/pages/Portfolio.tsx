@@ -158,14 +158,14 @@ const Portfolio = () => {
       </div>
 
       {/* ── Holdings Header ── */}
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4">
         <div className="flex items-center gap-3">
           <h2 className="text-2xl font-bold">Holdings</h2>
           {refreshing && <RefreshCw className="w-4 h-4 text-hero-text-muted animate-spin" />}
         </div>
         <button
           onClick={() => setShowForm(!showForm)}
-          className="flex items-center gap-2 px-4 py-2 rounded-lg bg-hero-accent text-hero-bg font-semibold text-sm hover:bg-hero-accent/80 transition-colors"
+          className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-hero-accent text-hero-bg font-semibold text-sm hover:bg-hero-accent/80 transition-colors"
         >
           <Plus className="w-4 h-4" />
           Add Holding
@@ -174,7 +174,7 @@ const Portfolio = () => {
 
       {/* ── Add Form ── */}
       {showForm && (
-        <div className="mb-6 p-6 rounded-xl bg-hero-surface border border-hero-border">
+        <div className="mb-6 p-4 md:p-6 rounded-xl bg-hero-surface border border-hero-border">
           <h3 className="text-lg font-semibold mb-4">Add New Holding</h3>
           {formError && (
             <div className="mb-4 p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
@@ -256,7 +256,8 @@ const Portfolio = () => {
       ) : (
         /* ── Holdings Table ── */
         <div className="rounded-xl border border-hero-border overflow-hidden">
-          <table className="w-full">
+          <div className="overflow-x-auto w-full">
+          <table className="w-full min-w-[700px]">
             <thead className="bg-hero-surface">
               <tr className="text-left text-sm text-hero-text-muted">
                 <th className="p-4 font-semibold">Symbol</th>
@@ -324,6 +325,7 @@ const Portfolio = () => {
               })}
             </tbody>
           </table>
+          </div>
 
           {/* ── Table Footer Totals ── */}
           <div className="bg-hero-surface border-t border-hero-border px-4 py-3 flex flex-wrap gap-6 text-sm">

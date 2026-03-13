@@ -113,14 +113,14 @@ const SignUp = () => {
   };
 
   return (
-    <div className="min-h-screen bg-hero-bg flex items-center justify-center px-4 py-10">
+    <div className="min-h-screen bg-hero-bg flex items-center justify-center px-4 py-8 md:py-10">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-hero-text">Create Account</h1>
           <p className="text-hero-text-muted mt-2">Join Traders Paradise today</p>
         </div>
 
-        <div className="bg-hero-surface border border-hero-border rounded-2xl p-8">
+        <div className="bg-hero-surface border border-hero-border rounded-2xl p-6 md:p-8">
           {error && (
             <div className="mb-4 p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm">{error}</div>
           )}

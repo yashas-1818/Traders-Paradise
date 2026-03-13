@@ -113,7 +113,7 @@ const Prediction = () => {
       <ServerStatusBanner />
 
       {/* Search */}
-      <div className="flex gap-3 mb-5 max-w-xl">
+      <div className="flex flex-col sm:flex-row gap-3 mb-5 max-w-xl">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-hero-text-muted" />
           <input
@@ -125,7 +125,7 @@ const Prediction = () => {
           />
         </div>
         <button onClick={() => handleAnalyze()} disabled={!query.trim() || loading}
-          className="px-5 py-3 bg-hero-accent text-hero-bg text-sm font-bold rounded-xl hover:bg-hero-accent/80 disabled:opacity-40 disabled:cursor-not-allowed transition-all flex items-center gap-2">
+          className="w-full sm:w-auto px-5 py-3 bg-hero-accent text-hero-bg text-sm font-bold rounded-xl hover:bg-hero-accent/80 disabled:opacity-40 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2">
           {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Brain className="w-4 h-4" />}
           {loading ? 'Analyzing...' : 'Analyze'}
         </button>
@@ -154,7 +154,7 @@ const Prediction = () => {
         <div className="text-center py-20">
           <div className="w-14 h-14 rounded-full border-2 border-hero-accent/20 border-t-hero-accent mx-auto mb-5 animate-spin" />
           <p className="text-hero-text-muted text-sm mb-4">Fetching market data & running AI analysis...</p>
-          <div className="flex justify-center gap-6">
+          <div className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-6">
             {['Fetching prices','Calculating indicators','Running AI sentiment'].map(s => (
               <span key={s} className="text-xs text-hero-text-muted flex items-center gap-1">
                 <span className="text-hero-accent">✓</span> {s}
@@ -169,16 +169,16 @@ const Prediction = () => {
         <div style={{ opacity: animStarted ? 1 : 0, transform: animStarted ? 'translateY(0)' : 'translateY(20px)', transition: 'all 0.6s cubic-bezier(0.4,0,0.2,1)' }}>
 
           {/* Main signal card */}
-          <div style={{ padding: '24px 28px', borderRadius: 20, marginBottom: 16, background: `linear-gradient(135deg, ${signalColor}08 0%, rgba(255,255,255,0.01) 100%)`, border: `1px solid ${signalColor}25`, boxShadow: '0 20px 60px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06)', backdropFilter: 'blur(20px)' }}>
-            <div className="flex justify-between items-start flex-wrap gap-6">
+          <div style={{ padding: '20px 16px', borderRadius: 20, marginBottom: 16, background: `linear-gradient(135deg, ${signalColor}08 0%, rgba(255,255,255,0.01) 100%)`, border: `1px solid ${signalColor}25`, boxShadow: '0 20px 60px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06)', backdropFilter: 'blur(20px)' }} className="px-4 md:px-7">
+            <div className="flex flex-col lg:flex-row justify-between items-start gap-6">
               <div>
                 <div className="flex items-center gap-2 mb-2">
                   <span className="text-xs text-hero-text-muted uppercase tracking-widest">{result.symbol} · NSE</span>
                   <span style={{ fontSize: 10, padding: '2px 8px', borderRadius: 999, background: 'rgba(74,222,128,0.1)', color: '#4ADE80', border: '1px solid rgba(74,222,128,0.2)' }}>LIVE</span>
                 </div>
                 <p className="text-sm text-hero-text-muted mb-2">{result.name}</p>
-                <p style={{ fontSize: 42, fontWeight: 900, letterSpacing: '-0.03em', marginBottom: 14, color: '#F9FAFB' }}>{fmt(result.currentPrice)}</p>
-                <div className="flex items-center gap-3">
+                <p className="text-2xl sm:text-3xl md:text-4xl" style={{ fontWeight: 900, letterSpacing: '-0.03em', marginBottom: 14, color: '#F9FAFB' }}>{fmt(result.currentPrice)}</p>
+                <div className="flex flex-wrap items-center gap-3">
                   <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '8px 20px', borderRadius: 999, background: `${signalColor}15`, border: `1px solid ${signalColor}30`, boxShadow: `0 0 20px ${signalColor}15` }}>
                     <div style={{ width: 8, height: 8, borderRadius: 999, background: signalColor, boxShadow: `0 0 10px ${signalColor}` }} />
                     <span style={{ fontSize: 16, fontWeight: 800, color: signalColor, letterSpacing: '0.04em' }}>{result.signal}</span>
@@ -188,7 +188,7 @@ const Prediction = () => {
                 </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10, minWidth: 320 }}>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full lg:w-auto lg:min-w-[320px]">
                 <ScoreCard label="Technical" score={result.technicalScore} color="#4ADE80" delay={0}   started={animStarted} />
                 <ScoreCard label="Sentiment" score={result.sentimentScore} color="#60A5FA" delay={150} started={animStarted} />
                 <ScoreCard label="Combined"  score={result.finalScore}     color="#A78BFA" delay={300} started={animStarted} />
@@ -196,7 +196,7 @@ const Prediction = () => {
             </div>
 
             {/* Stats bar */}
-            <div style={{ marginTop: 20, paddingTop: 16, borderTop: '1px solid rgba(255,255,255,0.05)', display: 'flex', gap: 32, flexWrap: 'wrap' }}>
+            <div className="flex flex-wrap gap-4 sm:gap-6 md:gap-8" style={{ marginTop: 20, paddingTop: 16, borderTop: '1px solid rgba(255,255,255,0.05)' }}>
               {[['Open', fmt(result.open)], ['High', fmt(result.high)], ['Low', fmt(result.low)], ['Prev Close', fmt(result.prevClose)]].map(([l, v]) => (
                 <div key={l}>
                   <p style={{ fontSize: 10, color: 'rgba(255,255,255,0.25)', marginBottom: 3, letterSpacing: '0.06em', textTransform: 'uppercase' }}>{l}</p>
@@ -207,18 +207,18 @@ const Prediction = () => {
           </div>
 
           {/* Chart */}
-          <div className="p-6 rounded-2xl bg-hero-surface border border-hero-border mb-4">
-            <div className="flex justify-between items-center mb-5">
+          <div className="p-4 md:p-6 rounded-2xl bg-hero-surface border border-hero-border mb-4">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-5">
               <p className="text-sm font-semibold text-hero-text flex items-center gap-2">
                 <BarChart2 className="w-4 h-4 text-hero-accent" /> Price Chart · 3 Months · MA50 Overlay
               </p>
-              <div className="flex gap-1">
+              <div className="flex gap-1 flex-wrap">
                 {['1D','1W','1M','3M','1Y'].map((r, i) => (
                   <span key={r} style={{ fontSize: 11, padding: '4px 10px', borderRadius: 8, background: i === 2 ? 'rgba(74,222,128,0.15)' : 'transparent', color: i === 2 ? '#4ADE80' : 'rgba(255,255,255,0.3)', border: `1px solid ${i === 2 ? 'rgba(74,222,128,0.3)' : 'rgba(255,255,255,0.06)'}`, cursor: 'pointer', fontWeight: i === 2 ? 700 : 400 }}>{r}</span>
                 ))}
               </div>
             </div>
-            <div style={{ height: 220 }}>
+            <div className="h-48 md:h-56 lg:h-64">
               <ResponsiveContainer width="100%" height="100%">
                 <ComposedChart data={result.chartData} margin={{ top: 5, right: 10, left: 0, bottom: 0 }}>
                   <defs>
@@ -241,21 +241,20 @@ const Prediction = () => {
 
           {/* Technical indicators */}
           <p style={{ fontSize: 12, fontWeight: 600, color: 'rgba(255,255,255,0.3)', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 12 }}>Technical Indicators</p>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 12, marginBottom: 16 }}>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
             {result.indicators.map((ind, i) => (
               <IndicatorCard key={ind.name} {...ind} index={i} started={animStarted} />
             ))}
           </div>
 
           {/* AI Sentiment */}
-          <div style={{ padding: 24, borderRadius: 20, marginBottom: 14, background: 'linear-gradient(135deg, rgba(96,165,250,0.05) 0%, rgba(255,255,255,0.01) 100%)', border: '1px solid rgba(96,165,250,0.12)', backdropFilter: 'blur(20px)' }}>
-            <div className="flex justify-between items-start flex-wrap gap-4">
+            <div className="flex flex-col lg:flex-row justify-between items-start gap-4" style={{ padding: 24, borderRadius: 20, marginBottom: 14, background: 'linear-gradient(135deg, rgba(96,165,250,0.05) 0%, rgba(255,255,255,0.01) 100%)', border: '1px solid rgba(96,165,250,0.12)', backdropFilter: 'blur(20px)' }}>
               <div style={{ flex: 1, minWidth: 200 }}>
                 <p style={{ fontSize: 12, fontWeight: 600, color: 'rgba(255,255,255,0.3)', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 8 }}>
                   <Brain className="w-3 h-3" /> Claude AI Sentiment
                 </p>
                 <div className="flex items-baseline gap-3 mb-3">
-                  <span style={{ fontSize: 28, fontWeight: 800, color: result.sentimentLabel === 'Bullish' ? '#4ADE80' : result.sentimentLabel === 'Bearish' ? '#F87171' : '#FCD34D', letterSpacing: '-0.02em' }}>
+                  <span className="text-xl sm:text-2xl md:text-3xl" style={{ fontWeight: 800, color: result.sentimentLabel === 'Bullish' ? '#4ADE80' : result.sentimentLabel === 'Bearish' ? '#F87171' : '#FCD34D', letterSpacing: '-0.02em' }}>
                     {result.sentimentLabel}
                   </span>
                   <span className="text-sm text-hero-text-muted">{result.sentimentScore} / 100</span>
@@ -271,7 +270,6 @@ const Prediction = () => {
                 ))}
               </div>
             </div>
-          </div>
 
           {/* Disclaimer */}
           <div style={{ padding: '12px 16px', borderRadius: 12, border: '1px solid rgba(252,211,77,0.12)', background: 'rgba(252,211,77,0.03)', display: 'flex', gap: 10, alignItems: 'flex-start' }}>

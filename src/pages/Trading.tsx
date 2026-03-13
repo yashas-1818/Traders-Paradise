@@ -38,7 +38,7 @@ const Trading = () => {
     <SectionLayout title="Trading" subtitle="Professional-grade tools for every trading style.">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
         {features.map((f) => (
-          <div key={f.title} className="p-6 rounded-xl bg-hero-surface border border-hero-border hover:border-hero-accent/30 transition-colors">
+          <div key={f.title} className="p-4 md:p-6 rounded-xl bg-hero-surface border border-hero-border hover:border-hero-accent/30 transition-colors">
             <f.icon className="w-8 h-8 text-hero-accent mb-4" />
             <h3 className="text-lg font-semibold mb-2">{f.title}</h3>
             <p className="text-sm text-hero-text-muted">{f.description}</p>
@@ -46,10 +46,10 @@ const Trading = () => {
         ))}
       </div>
 
-      <h2 className="text-2xl font-bold mb-6">Supported Order Types</h2>
+      <h2 className="text-xl md:text-2xl font-bold mb-4 md:mb-6">Supported Order Types</h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {orderTypes.map((o) => (
-          <div key={o.name} className="p-4 rounded-lg bg-hero-surface/50 border border-hero-border">
+          <div key={o.name} className="p-3 md:p-4 rounded-lg bg-hero-surface/50 border border-hero-border">
             <h4 className="font-semibold text-hero-accent">{o.name}</h4>
             <p className="text-sm text-hero-text-muted mt-1">{o.desc}</p>
           </div>

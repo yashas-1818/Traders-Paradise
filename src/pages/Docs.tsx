@@ -15,7 +15,7 @@ const Docs = () => {
     <SectionLayout title="Documentation" subtitle="Everything you need to get started and build on our platform.">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
         {sections.map((s) => (
-          <div key={s.title} className="p-6 rounded-xl bg-hero-surface border border-hero-border hover:border-hero-accent/30 transition-colors cursor-pointer group">
+          <div key={s.title} className="p-4 md:p-6 rounded-xl bg-hero-surface border border-hero-border hover:border-hero-accent/30 transition-colors cursor-pointer group">
             <s.icon className="w-8 h-8 text-hero-accent mb-4 group-hover:scale-110 transition-transform" />
             <h3 className="text-lg font-semibold mb-2 group-hover:text-hero-accent transition-colors">{s.title}</h3>
             <p className="text-sm text-hero-text-muted">{s.description}</p>

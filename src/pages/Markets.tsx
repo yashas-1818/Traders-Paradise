@@ -189,7 +189,7 @@ const ProChart = ({ symbol }: { symbol: string }) => {
 
   return (
     <div className="rounded-xl bg-hero-surface border border-hero-border overflow-hidden">
-      <div className="flex items-center justify-between px-5 py-3 border-b border-hero-border flex-wrap gap-3">
+      <div className="flex flex-col sm:flex-row items-center justify-between px-3 sm:px-5 py-3 border-b border-hero-border gap-3">
         <div className="flex items-center gap-3">
           <BarChart3 className="w-4 h-4 text-hero-accent" />
           <span className="text-sm font-bold text-hero-text">{symbol}</span>
@@ -230,7 +230,7 @@ const ProChart = ({ symbol }: { symbol: string }) => {
           </span>
         </div>
       </div>
-      <div className="relative" style={{ height: 460 }}>
+      <div className="relative h-[280px] sm:h-[360px] md:h-[420px] lg:h-[460px]">
         {loading && (
           <div className="absolute inset-0 flex items-center justify-center z-10 bg-hero-bg/40">
             <Loader2 className="w-6 h-6 animate-spin text-hero-accent" />
@@ -238,7 +238,7 @@ const ProChart = ({ symbol }: { symbol: string }) => {
         )}
         <div ref={containerRef} style={{ width: '100%', height: '100%' }} />
       </div>
-      <div className="flex gap-2 px-5 py-3 border-t border-hero-border flex-wrap">
+      <div className="flex gap-2 px-3 sm:px-5 py-3 border-t border-hero-border flex-wrap">
         <span className="text-xs text-hero-text-muted self-center">Switch:</span>
         {['RELIANCE','TCS','HDFCBANK','INFY','SBIN','TATAMOTORS','WIPRO','BAJFINANCE'].map(s => (
           <button key={s} onClick={() => {
@@ -505,7 +505,7 @@ const Markets = () => {
 
       {searchResult && (
         <div className="mb-8 rounded-xl bg-hero-surface border border-hero-accent/30 overflow-hidden">
-          <div className="p-5 flex items-start justify-between flex-wrap gap-4">
+        <div className="p-4 md:p-5 flex flex-col sm:flex-row items-start justify-between gap-4">
             <div>
               <p className="text-xs text-hero-text-muted mb-1">{searchResult.symbol}</p>
               <h3 className="text-xl font-bold text-hero-text">{searchResult.name}</h3>
@@ -516,7 +516,7 @@ const Markets = () => {
             </div>
             <div className="flex items-start gap-4">
               <div className="text-right">
-                <p className="text-3xl font-bold text-hero-text">{searchResult.value}</p>
+                <p className="text-xl sm:text-2xl md:text-3xl font-bold text-hero-text">{searchResult.value}</p>
                 <div className="flex gap-4 mt-2">
                   {[['O', searchResult.open], ['H', searchResult.high], ['L', searchResult.low]].map(([l, v]) => (
                     <div key={l} className="text-right">
@@ -539,7 +539,7 @@ const Markets = () => {
               </button>
             ))}
           </div>
-          <div className="relative h-48 px-2 pb-4">
+          <div className="relative h-48 sm:h-56 md:h-64 px-2 pb-4">
             {chartLoading && (
               <div className="absolute inset-0 flex items-center justify-center z-10">
                 <Loader2 className="w-5 h-5 animate-spin text-hero-accent" />
@@ -581,18 +581,18 @@ const Markets = () => {
             ))}
       </div>
 
-      <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="p-6 rounded-xl bg-hero-surface border border-hero-border">
+      <div className="mt-8 md:mt-12 grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
+        <div className="p-4 md:p-6 rounded-xl bg-hero-surface border border-hero-border">
           <BarChart3 className="w-8 h-8 text-hero-accent mb-4" />
           <h3 className="text-lg font-semibold mb-2">NSE & BSE Analytics</h3>
           <p className="text-sm text-hero-text-muted">Advanced charting with 100+ technical indicators for Indian equities, F&O, and commodity markets.</p>
         </div>
-        <div className="p-6 rounded-xl bg-hero-surface border border-hero-border">
+        <div className="p-4 md:p-6 rounded-xl bg-hero-surface border border-hero-border">
           <Globe className="w-8 h-8 text-hero-accent mb-4" />
           <h3 className="text-lg font-semibold mb-2">Pan-India Coverage</h3>
           <p className="text-sm text-hero-text-muted">Track all NSE & BSE listed stocks, mutual funds, ETFs, and government bonds in one place.</p>
         </div>
-        <div className="p-6 rounded-xl bg-hero-surface border border-hero-border">
+        <div className="p-4 md:p-6 rounded-xl bg-hero-surface border border-hero-border">
           <TrendingUp className="w-8 h-8 text-hero-accent mb-4" />
           <h3 className="text-lg font-semibold mb-2">Live Market Feeds</h3>
           <p className="text-sm text-hero-text-muted">Real-time tick data from NSE and BSE with Level 2 order book depth for professional traders.</p>

@@ -152,7 +152,7 @@ export const HeroSection: React.FC = () => {
       <div className="relative z-10 min-h-screen flex flex-col">
 
         {/* ── Navbar ── */}
-        <nav className="relative z-40 px-6 py-4">
+        <nav className="relative z-40 px-4 md:px-6 py-4">
           <div className="max-w-7xl mx-auto flex items-center justify-between">
 
             {/* Logo */}
@@ -181,7 +181,7 @@ export const HeroSection: React.FC = () => {
             </motion.div>
 
             {/* Desktop nav links */}
-            <div className="hidden md:flex items-center gap-8 text-sm text-hero-text-muted">
+            <div className="hidden lg:flex items-center gap-4 xl:gap-8 text-sm text-hero-text-muted">
               {[['Markets','/markets'],['Trading','/trading'],['Portfolio','/portfolio'],['Research','/research'],['Prediction ✦','/prediction'],['Docs','/docs']].map(([label,to]) => (
                 <motion.div key={to} whileHover={{ y: -2 }} transition={{ duration: 0.2 }}>
                   <Link
@@ -200,7 +200,7 @@ export const HeroSection: React.FC = () => {
             {/* Auth area */}
             <div className="flex items-center gap-3">
               {user ? (
-                <div className="hidden md:flex items-center gap-3">
+                <div className="hidden lg:flex items-center gap-3">
                   <span className="text-sm text-hero-text-muted">{user.name}</span>
                   <button
                     onClick={logout}
@@ -212,12 +212,12 @@ export const HeroSection: React.FC = () => {
               ) : (
                 <Link
                   to="/signup"
-                  className="hidden md:inline-block text-sm px-4 py-2 bg-hero-accent text-hero-bg font-semibold rounded-lg hover:bg-hero-accent/80 transition-colors"
+                  className="hidden lg:inline-block text-sm px-4 py-2 bg-hero-accent text-hero-bg font-semibold rounded-lg hover:bg-hero-accent/80 transition-colors"
                 >
                   Get Started
                 </Link>
               )}
-              <button className="md:hidden text-hero-text-muted" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+              <button className="lg:hidden text-hero-text-muted" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
                 {mobileMenuOpen
                   ? <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
                   : <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 12h16M4 6h16M4 18h16"/></svg>
@@ -235,7 +235,7 @@ export const HeroSection: React.FC = () => {
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
-              className="md:hidden bg-hero-surface/95 backdrop-blur-md border-b border-hero-border z-50 relative"
+              className="lg:hidden bg-hero-surface/95 backdrop-blur-md border-b border-hero-border z-50 relative"
             >
               <div className="flex flex-col items-center gap-4 py-6 text-sm">
                 <button onClick={() => setMobileMenuOpen(false)} className="absolute top-4 right-4 text-hero-text-muted">
@@ -267,15 +267,17 @@ export const HeroSection: React.FC = () => {
           )}
         </AnimatePresence>
 
-        {/* ── Live tickers ── */}
-        <FeatureItem name="NIFTY 50"  value={tickers.nifty}    up={tickers.niftyUp}    position="top-[30%] left-[8%]" />
-        <FeatureItem name="SENSEX"    value={tickers.sensex}   up={tickers.sensexUp}   position="top-[25%] right-[10%]" />
-        <FeatureItem name="RELIANCE"  value={tickers.reliance} up={tickers.relianceUp} position="bottom-[30%] left-[5%]" />
-        <FeatureItem name="Volume"    value={tickers.volume}   up={true}               position="bottom-[25%] right-[8%]" />
+        {/* ── Live tickers (hidden on mobile/tablet to avoid overlap) ── */}
+        <div className="hidden lg:block">
+          <FeatureItem name="NIFTY 50"  value={tickers.nifty}    up={tickers.niftyUp}    position="top-[30%] left-[8%]" />
+          <FeatureItem name="SENSEX"    value={tickers.sensex}   up={tickers.sensexUp}   position="top-[25%] right-[10%]" />
+          <FeatureItem name="RELIANCE"  value={tickers.reliance} up={tickers.relianceUp} position="bottom-[30%] left-[5%]" />
+          <FeatureItem name="Volume"    value={tickers.volume}   up={true}               position="bottom-[25%] right-[8%]" />
+        </div>
 
         {/* ── Hero content ── */}
         <motion.div
-          className="flex-1 flex flex-col items-center justify-center text-center px-6 relative z-20"
+          className="flex-1 flex flex-col items-center justify-center text-center px-4 md:px-6 relative z-20"
           variants={containerVariants} initial="hidden" animate="visible"
         >
           <motion.div variants={itemVariants}>
@@ -295,29 +297,29 @@ export const HeroSection: React.FC = () => {
             </Link>
           </motion.div>
 
-          <motion.h1 variants={itemVariants} className="text-5xl md:text-7xl lg:text-8xl font-bold text-hero-text tracking-tight">
+          <motion.h1 variants={itemVariants} className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl xl:text-8xl font-bold text-hero-text tracking-tight">
             Traders Paradise
           </motion.h1>
 
-          <motion.p variants={itemVariants} className="text-2xl md:text-3xl lg:text-4xl font-light text-hero-text-muted mt-2">
+          <motion.p variants={itemVariants} className="text-lg sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl font-light text-hero-text-muted mt-2">
             Lighting Up The Future
           </motion.p>
 
-          <motion.p variants={itemVariants} className="max-w-xl text-hero-text-muted/70 mt-6 text-sm md:text-base">
+          <motion.p variants={itemVariants} className="max-w-xl text-hero-text-muted/70 mt-4 md:mt-6 text-xs sm:text-sm md:text-base px-2">
             Built for the next generation of traders who demand speed, precision, and insight.
             Real-time data, powerful analytics, and seamless execution.
           </motion.p>
 
-          <motion.div variants={itemVariants} className="flex items-center gap-4 mt-8">
+          <motion.div variants={itemVariants} className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4 mt-6 md:mt-8 w-full sm:w-auto px-4 sm:px-0">
             <Link
               to="/trading"
-              className="inline-block px-8 py-3 bg-hero-accent text-hero-bg font-semibold rounded-lg hover:bg-hero-accent/80 transition-colors text-sm"
+              className="w-full sm:w-auto text-center px-8 py-3 bg-hero-accent text-hero-bg font-semibold rounded-lg hover:bg-hero-accent/80 transition-colors text-sm"
             >
               Start Trading Now
             </Link>
             <Link
               to="/prediction"
-              className="inline-block px-6 py-3 border border-hero-accent/30 text-hero-accent font-semibold rounded-lg hover:bg-hero-accent/10 transition-colors text-sm"
+              className="w-full sm:w-auto text-center px-6 py-3 border border-hero-accent/30 text-hero-accent font-semibold rounded-lg hover:bg-hero-accent/10 transition-colors text-sm"
             >
               🔮 Try Prediction
             </Link>
@@ -328,11 +330,11 @@ export const HeroSection: React.FC = () => {
       {/* ── Background ── */}
       <div className="absolute inset-0 z-0">
         <div className="absolute inset-0 bg-hero-bg/40 z-10" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-hero-accent/5 blur-[120px] z-0" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] md:w-[600px] md:h-[600px] rounded-full bg-hero-accent/5 blur-[80px] md:blur-[120px] z-0" />
         <div className="absolute inset-0 z-5">
           <Lightning hue={220} xOffset={0} speed={0.8} intensity={1.2} size={1} />
         </div>
-        <div className="absolute bottom-[-20%] left-1/2 -translate-x-1/2 w-[800px] h-[800px] rounded-full bg-gradient-to-t from-hero-accent/10 to-transparent blur-sm z-5 opacity-30" />
+        <div className="absolute bottom-[-20%] left-1/2 -translate-x-1/2 w-[400px] h-[400px] md:w-[800px] md:h-[800px] rounded-full bg-gradient-to-t from-hero-accent/10 to-transparent blur-sm z-5 opacity-30" />
       </div>
     </div>
   );

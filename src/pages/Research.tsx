@@ -15,7 +15,7 @@ const Research = () => {
     <SectionLayout title="Research" subtitle="In-depth analysis and market intelligence from our team.">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         {reports.map((r, i) => (
-          <div key={i} className="p-6 rounded-xl bg-hero-surface border border-hero-border hover:border-hero-accent/30 transition-colors cursor-pointer group">
+          <div key={i} className="p-4 md:p-6 rounded-xl bg-hero-surface border border-hero-border hover:border-hero-accent/30 transition-colors cursor-pointer group">
             <div className="flex items-start gap-4">
               <div className="p-2 rounded-lg bg-hero-accent/10">
                 <r.icon className="w-5 h-5 text-hero-accent" />

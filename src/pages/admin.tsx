@@ -88,7 +88,7 @@ const Admin = () => {
   return (
     <div className="min-h-screen bg-hero-bg text-hero-text">
       {/* Header */}
-      <div className="border-b border-hero-border bg-hero-surface px-6 py-4 flex items-center justify-between">
+      <div className="border-b border-hero-border bg-hero-surface px-4 md:px-6 py-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <div className="flex items-center gap-3">
           <Shield className="w-5 h-5 text-hero-accent" />
           <span className="font-bold text-lg">Traders Paradise — Admin</span>
@@ -98,7 +98,7 @@ const Admin = () => {
         </button>
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 py-8">
+      <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8 py-6 md:py-8">
         {loading ? (
           <div className="flex items-center justify-center h-64">
             <RefreshCw className="w-8 h-8 animate-spin text-hero-accent" />
@@ -138,7 +138,7 @@ const Admin = () => {
             {/* ── Breakdown Charts ── */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
               {/* Profession */}
-              <div className="p-6 rounded-xl bg-hero-surface border border-hero-border">
+              <div className="p-4 md:p-6 rounded-xl bg-hero-surface border border-hero-border">
                 <h3 className="font-bold text-lg mb-4 flex items-center gap-2">
                   <Briefcase className="w-4 h-4 text-hero-accent" /> Profession Breakdown
                 </h3>
@@ -159,7 +159,7 @@ const Admin = () => {
               </div>
 
               {/* Income */}
-              <div className="p-6 rounded-xl bg-hero-surface border border-hero-border">
+              <div className="p-4 md:p-6 rounded-xl bg-hero-surface border border-hero-border">
                 <h3 className="font-bold text-lg mb-4 flex items-center gap-2">
                   <DollarSign className="w-4 h-4 text-hero-accent" /> Annual Income Breakdown
                 </h3>
@@ -182,13 +182,13 @@ const Admin = () => {
 
             {/* ── Users Table ── */}
             <div className="rounded-xl bg-hero-surface border border-hero-border overflow-hidden">
-              <div className="px-6 py-4 border-b border-hero-border flex items-center justify-between flex-wrap gap-3">
+              <div className="px-4 md:px-6 py-4 border-b border-hero-border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                 <h3 className="font-bold text-lg flex items-center gap-2">
                   <Users className="w-4 h-4 text-hero-accent" /> All Users ({stats.totalUsers})
                 </h3>
                 <input value={search} onChange={e => setSearch(e.target.value)}
                   placeholder="Search by name, email, profession..."
-                  className="px-4 py-2 rounded-lg bg-hero-bg border border-hero-border text-sm text-hero-text focus:outline-none focus:border-hero-accent/50 w-64" />
+                  className="w-full sm:w-64 px-4 py-2 rounded-lg bg-hero-bg border border-hero-border text-sm text-hero-text focus:outline-none focus:border-hero-accent/50" />
               </div>
               <div className="overflow-x-auto">
                 <table className="w-full">

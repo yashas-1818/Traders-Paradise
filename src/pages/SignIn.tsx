@@ -33,7 +33,7 @@ const SignIn = () => {
   return (
     <div className="min-h-screen flex flex-col" style={{ background: '#060d06' }}>
       {/* Nav */}
-      <nav className="px-6 py-4 border-b border-white/10">
+      <nav className="px-4 md:px-6 py-4 border-b border-white/10">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors">
             <ArrowLeft className="w-4 h-4" />
@@ -45,21 +45,21 @@ const SignIn = () => {
       </nav>
 
       {/* Form */}
-      <div className="flex-1 flex items-center justify-center px-6">
+      <div className="flex-1 flex items-center justify-center px-4 md:px-6 py-6">
         <motion.div
           className="w-full max-w-md"
           initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
-          <div className="p-8 rounded-2xl border border-white/10" style={{ background: '#0a1a0a' }}>
+          <div className="p-6 md:p-8 rounded-2xl border border-white/10" style={{ background: '#0a1a0a' }}>
             {/* Header */}
             <div className="flex flex-col items-center mb-8">
               <div className="w-14 h-14 rounded-xl flex items-center justify-center mb-4"
                    style={{ background: 'rgba(74,222,128,0.12)', border: '1px solid rgba(74,222,128,0.25)' }}>
                 <LogIn className="w-7 h-7" style={{ color: '#4ADE80' }} />
               </div>
-              <h1 className="text-3xl font-bold text-white mb-1">Welcome Back</h1>
+              <h1 className="text-2xl md:text-3xl font-bold text-white mb-1">Welcome Back</h1>
               <p className="text-gray-400 text-sm">Sign in to access your trading dashboard</p>
             </div>
 
