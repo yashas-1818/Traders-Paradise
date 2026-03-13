@@ -106,7 +106,7 @@ const Lightning: React.FC<LightningProps> = ({ hue=230, xOffset=0, speed=1, inte
     id=requestAnimationFrame(render);
     return () => { window.removeEventListener('resize',resize); cancelAnimationFrame(id); };
   }, [hue, xOffset, speed, intensity, size]);
-  return <canvas ref={canvasRef} className="w-full h-full" />;
+  return <canvas ref={canvasRef} className="absolute inset-0 w-full h-full object-cover" />;
 };
 
 interface FeatureItemProps {
@@ -331,7 +331,7 @@ export const HeroSection: React.FC = () => {
       <div className="absolute inset-0 z-0">
         <div className="absolute inset-0 bg-hero-bg/40 z-10" />
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] md:w-[600px] md:h-[600px] rounded-full bg-hero-accent/5 blur-[80px] md:blur-[120px] z-0" />
-        <div className="absolute inset-0 z-5">
+        <div className="absolute inset-0 w-full h-full overflow-hidden z-5">
           <Lightning hue={220} xOffset={0} speed={0.8} intensity={1.2} size={1} />
         </div>
         <div className="absolute bottom-[-20%] left-1/2 -translate-x-1/2 w-[400px] h-[400px] md:w-[800px] md:h-[800px] rounded-full bg-gradient-to-t from-hero-accent/10 to-transparent blur-sm z-5 opacity-30" />
